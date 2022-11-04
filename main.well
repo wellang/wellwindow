@@ -1,0 +1,105 @@
+~include <std.well>
+
+// we have to use  "asm~ call" on the glfw & opengl functions so we can use wrt ..plt
+
+~var:main {
+
+  asm~ str: db '%s', 10, 0
+
+  int~ width = 1280
+  int~ height = 720
+  string~ WINDOW_NAME = 'TEST'
+
+  string~ init_error = 'TEST RAN INTO A INIT ERROR!'
+  string~ loop_error = 'TEST RAN INTO A LOOP ERROR!'
+
+
+asm~ section .bss
+  asm~ window: resq 1 
+}
+
+~func:mloop {
+
+               asm~ jmp mloop.loop
+               asm~ .loop:
+               move~ [rel window], rdi
+               asm~ call glfwWindowShouldClose wrt ..plt
+               ~if(rax == 0)
+                 asm~ jmp mloop.loop1
+               end
+               ~if(rax != 0)
+                 move~ str, r8
+                 move~ init_error, r9
+                 call~ util.print
+                 return~ 1
+               end
+
+               asm~ .loop1:
+                  move~ [rel window], rdi
+                  asm~ call glfwSwapBuffers wrt ..plt
+                  asm~ call glfwPollEvents wrt ..plt
+                  asm~ jmp mloop.loop
+}
+
+~func:init {
+
+  asm~ call glfwInit wrt ..plt
+
+  ~if(rax == 0)
+    
+    move~ str, r8
+    move~ init_error, r9
+    call~ util.print
+    return~ 1
+  
+  end
+
+  // glfwCreateWindow(1280, 720, WINDOW_NAME, NULL, NULL);
+  move~ 0, r8
+  move~ 0, rcx
+  move~ WINDOW_NAME, rdx
+  move~ width, rdi
+  move~ height, rsi
+  asm~ call glfwCreateWindow wrt ..plt
+
+  ~if(rax == 0)
+
+     move~ str, r8
+     move~ init_error, r9
+     call~ util.print
+     return~ 1
+
+  end
+
+  move~ rax, [rel window]
+  move~ [rel window], rdi
+  asm~ call glfwMakeContextCurrent wrt ..plt
+
+  move~ 0, rdi
+  move~ 0, rsi
+  move~ width, rdx
+  move~ height, rcx
+  asm~ call glViewport wrt ..plt
+
+  asm~ jmp mloop.loop
+
+  return~ 0
+
+}
+
+~func:main {
+
+  asm~ extern printf
+
+  asm~ extern glfwInit
+  asm~ extern glfwCreateWindow
+  asm~ extern glfwMakeContextCurrent
+  asm~ extern glfwWindowShouldClose
+  asm~ extern glfwPollEvents
+  asm~ extern glViewport
+  asm~ extern glfwSwapBuffers
+
+  call~ init
+  return~ 0
+
+}
