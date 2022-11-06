@@ -4,102 +4,120 @@
 
 ~var:main {
 
-  asm~ str: db '%s', 10, 0
+  	asm~ str: db '%s', 10, 0
 
-  int~ width = 1280
-  int~ height = 720
-  string~ WINDOW_NAME = 'TEST'
+  	int~ width = 1280
+  	int~ height = 720
+  	string~ WINDOW_NAME = 'TEST'
 
-  string~ init_error = 'TEST RAN INTO A INIT ERROR!'
-  string~ loop_error = 'TEST RAN INTO A LOOP ERROR!'
+  	string~ init_error = 'TEST RAN INTO A INIT ERROR!'
+ 	string~ loop_error = 'TEST RAN INTO A LOOP ERROR!'
 
+	int~ GL_COLOR_BUFFER_BIT = 0x00004000
+	int~ GL_DEPTH_BUFFER_BIT = 0x00000100
+
+	asm~ pFourF: dd 0.4
+	asm~ zeroF: dd 0.0
+	asm~ oneF: dd 1.0
+	asm~ threeF: dd 3.0
 
 asm~ section .bss
-  asm~ window: resq 1 
+ 	asm~ window: resq 1 
 }
 
 ~func:mloop {
 
-               asm~ jmp mloop.loop
-               asm~ .loop:
-               move~ [rel window], rdi
-               asm~ call glfwWindowShouldClose wrt ..plt
-               ~if(rax == 0)
-                 asm~ jmp mloop.loop1
-               end
-               ~if(rax != 0)
-                 move~ str, r8
-                 move~ init_error, r9
-                 call~ util.print
-                 return~ 1
-               end
+        asm~ jmp mloop.loop
+        asm~ .loop:
+        move~ [rel window], rdi
+        call~ glfwWindowShouldClose
+        ~if(rax != 0)
+                move~ str, r8
+                move~ init_error, r9
+                call~ util.print
+        	return~ 1
+        end
+	asm~ jmp mloop.loop1
 
-               asm~ .loop1:
-                  move~ [rel window], rdi
-                  asm~ call glfwSwapBuffers wrt ..plt
-                  asm~ call glfwPollEvents wrt ..plt
-                  asm~ jmp mloop.loop
+        asm~ .loop1:
+
+        // xmm0:R, xmm1: G, xmm2: B, xmm3: A
+        movef~ [rel zeroF], xmm0
+        movef~ [rel zeroF], xmm1
+        movef~ [rel pFourF], xmm2
+        movef~ [rel oneF], xmm3
+	call~ glClearColor
+
+	move~ GL_COLOR_BUFFER_BIT, rdi
+	call~ glClear
+
+        move~ [rel window], rdi
+	call~ glfwSwapBuffers
+        call~ glfwPollEvents
+	asm~ jmp mloop.loop
 }
 
 ~func:init {
 
-  asm~ call glfwInit wrt ..plt
+  	call~ glfwInit
 
-  ~if(rax == 0)
+  	~if(rax == 0)
     
-    move~ str, r8
-    move~ init_error, r9
-    call~ util.print
-    return~ 1
+    		move~ str, r8
+    		move~ init_error, r9
+    		call~ util.print
+   		return~ 1
   
-  end
+  	end
 
-  // glfwCreateWindow(1280, 720, WINDOW_NAME, NULL, NULL);
-  move~ 0, r8
-  move~ 0, rcx
-  move~ WINDOW_NAME, rdx
-  move~ width, rdi
-  move~ height, rsi
-  asm~ call glfwCreateWindow wrt ..plt
+  	// glfwCreateWindow(1280, 720, WINDOW_NAME, NULL, NULL);
+  	move~ 0, r8
+  	move~ 0, rcx
+  	move~ WINDOW_NAME, rdx
+  	move~ width, rdi
+  	move~ height, rsi
+  	call~ glfwCreateWindow
 
-  ~if(rax == 0)
+  	~if(rax == 0)
 
-     move~ str, r8
-     move~ init_error, r9
-     call~ util.print
-     return~ 1
+     		move~ str, r8
+     		move~ init_error, r9
+     		call~ util.print
+     		return~ 1
 
-  end
+  	end
 
-  move~ rax, [rel window]
-  move~ [rel window], rdi
-  asm~ call glfwMakeContextCurrent wrt ..plt
+  	move~ rax, [rel window]
+  	move~ [rel window], rdi
+  	call~ glfwMakeContextCurrent
 
-  move~ 0, rdi
-  move~ 0, rsi
-  move~ width, rdx
-  move~ height, rcx
-  asm~ call glViewport wrt ..plt
+  	move~ 0, rdi
+  	move~ 0, rsi
+  	move~ width, rdx
+  	move~ height, rcx
+  	call~ glViewport
 
-  asm~ jmp mloop.loop
+  	asm~ jmp mloop.loop
 
-  return~ 0
+  	return~ 0
 
 }
 
 ~func:main {
 
-  asm~ extern printf
+  	asm~ extern printf
 
-  asm~ extern glfwInit
-  asm~ extern glfwCreateWindow
-  asm~ extern glfwMakeContextCurrent
-  asm~ extern glfwWindowShouldClose
-  asm~ extern glfwPollEvents
-  asm~ extern glViewport
-  asm~ extern glfwSwapBuffers
+  	asm~ extern glfwInit
+  	asm~ extern glfwCreateWindow
+  	asm~ extern glfwMakeContextCurrent
+  	asm~ extern glfwWindowShouldClose
+  	asm~ extern glfwPollEvents
+  	asm~ extern glViewport
+	asm~ extern glfwSwapBuffers
+	asm~ extern glClear
+	asm~ extern glClearColor
 
-  call~ init
-  return~ 0
+  	call~ init
+  	return~ 0
 
 }

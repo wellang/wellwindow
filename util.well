@@ -1,12 +1,12 @@
 ~func:print {
 
-  // r8: %s
-  // r9: str
+  	// r8: %s
+  	// r9: str
 
-  move~ r8, rdi
-  move~ r9, rsi
-  move~ 0, rax
-  call~ printf
-  asm~ ret
+ 	move~ r8, rdi
+ 	move~ r9, rsi
+  	move~ 0, rax
+  	call~ printf
+ 	asm~ ret
 
 }
