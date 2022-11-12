@@ -1,7 +1,5 @@
 ~include <std.well>
 
-// we have to use  "asm~ call" on the glfw & opengl functions so we can use wrt ..plt
-
 ~var:main {
 
   	asm~ str: db '%s', 10, 0
@@ -22,22 +20,22 @@
 	asm~ threeF: dd 3.0
 
 asm~ section .bss
- 	asm~ window: resq 1 
+	asm~ window: resq 1
 }
 
 ~func:mloop {
 
-        asm~ jmp mloop.loop
+        jump~ mloop.loop
         asm~ .loop:
         move~ [rel window], rdi
         call~ glfwWindowShouldClose
         ~if(rax != 0)
                 move~ str, r8
                 move~ init_error, r9
-                call~ util.print
+                call~ util:print
         	return~ 1
         end
-	asm~ jmp mloop.loop1
+	jump~ mloop.loop1
 
         asm~ .loop1:
 
@@ -54,7 +52,7 @@ asm~ section .bss
         move~ [rel window], rdi
 	call~ glfwSwapBuffers
         call~ glfwPollEvents
-	asm~ jmp mloop.loop
+	jump~ mloop.loop
 }
 
 ~func:init {
@@ -65,7 +63,7 @@ asm~ section .bss
     
     		move~ str, r8
     		move~ init_error, r9
-    		call~ util.print
+    		call~ util:print
    		return~ 1
   
   	end
@@ -82,7 +80,7 @@ asm~ section .bss
 
      		move~ str, r8
      		move~ init_error, r9
-     		call~ util.print
+     		call~ util:print
      		return~ 1
 
   	end
@@ -97,7 +95,7 @@ asm~ section .bss
   	move~ height, rcx
   	call~ glViewport
 
-  	asm~ jmp mloop.loop
+  	jump~ mloop.loop
 
   	return~ 0
 
