@@ -18,9 +18,9 @@
 	asm~ zeroF: dd 0.0
 	asm~ oneF: dd 1.0
 	asm~ threeF: dd 3.0
+	
+	mut~ window = resb 1
 
-asm~ section .bss
-	asm~ window: resq 1
 }
 
 ~func:mloop {
