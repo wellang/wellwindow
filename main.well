@@ -25,34 +25,33 @@
 
 ~func:mloop {
 
-        jump~ mloop.loop
-        asm~ .loop:
         move~ [rel window], rdi
         call~ glfwWindowShouldClose
         ~if(rax != 0)
                 move~ str, r8
                 move~ init_error, r9
                 call~ util:print
-        	return~ 1
+                return~ 1
         end
-	jump~ mloop.loop1
+        jump~ loop1
 
-        asm~ .loop1:
+}
+~func:loop1 {
 
         // xmm0:R, xmm1: G, xmm2: B, xmm3: A
         movef~ [rel zeroF], xmm0
         movef~ [rel zeroF], xmm1
         movef~ [rel pFourF], xmm2
         movef~ [rel oneF], xmm3
-	call~ glClearColor
+	      call~ glClearColor
 
-	move~ GL_COLOR_BUFFER_BIT, rdi
-	call~ glClear
+	      move~ GL_COLOR_BUFFER_BIT, rdi
+	      call~ glClear
 
         move~ [rel window], rdi
-	call~ glfwSwapBuffers
+	      call~ glfwSwapBuffers
         call~ glfwPollEvents
-	jump~ mloop.loop
+	      jump~ mloop
 }
 
 ~func:init {
@@ -95,7 +94,7 @@
   	move~ height, rcx
   	call~ glViewport
 
-  	jump~ mloop.loop
+  	jump~ mloop
 
   	return~ 0
 
