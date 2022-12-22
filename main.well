@@ -32,7 +32,7 @@
                 move~ init_error, r9
                 call~ util:print
                 return~ 1
-        end
+        ~end
         jump~ loop1
 
 }
@@ -65,7 +65,7 @@
     		call~ util:print
    		return~ 1
   
-  	end
+  	~end
 
   	// glfwCreateWindow(1280, 720, WINDOW_NAME, NULL, NULL);
   	move~ 0, r8
@@ -82,7 +82,7 @@
      		call~ util:print
      		return~ 1
 
-  	end
+  	~end
 
   	move~ rax, [rel window]
   	move~ [rel window], rdi
